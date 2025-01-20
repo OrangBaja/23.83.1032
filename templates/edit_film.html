@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Edit Film</title>
+</head>
+<body>
+    <h1>Edit Film</h1>
+    <form action="/film/{{ film['id'] }}" method="post">
+        <input type="text" name="judul_film" value="{{ film['judul_film'] }}" required><br>
+        <textarea name="deskripsi" required>{{ film['deskripsi'] }}</textarea><br>
+        <input type="number" name="rating" value="{{ film['rating'] }}" min="0" max="10" step="0.1" required><br>
+        <input type="text" name="sutradara" value="{{ film['sutradara'] }}" required><br>
+        <input type="number" name="tahun_rilis" value="{{ film['tahun_rilis'] }}" required><br>
+        <button type="submit">Update</button>
+    </form>
+</body>
+</html>

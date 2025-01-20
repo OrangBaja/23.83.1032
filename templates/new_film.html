@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Tambah Film</title>
+</head>
+<body>
+    <h1>Tambah Film</h1>
+    <form action="/film" method="post">
+        <input type="text" name="judul_film" placeholder="Judul Film" required><br>
+        <textarea name="deskripsi" placeholder="Deskripsi" required></textarea><br>
+        <input type="number" name="rating" placeholder="Rating" min="0" max="10" step="0.1" required><br>
+        <input type="text" name="sutradara" placeholder="Sutradara" required><br>
+        <input type="number" name="tahun_rilis" placeholder="Tahun Rilis" required><br>
+        <button type="submit">Tambah</button>
+    </form>
+</body>
+</html>

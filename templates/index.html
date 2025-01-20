@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film Management</title>
+    <!-- Bootstrap CSS --> 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container my-5">
+        <h1 class="text-center">Film List</h1>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#filmFormModal" onclick="openAddFilmModal()">Add New Film</button>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Rating</th>
+                    <th>Director</th>
+                    <th>Release Year</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="film-list">
+                <!-- Film rows will be added dynamically here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for adding/editing film -->
+    <div class="modal fade" id="filmFormModal" tabindex="-1" aria-labelledby="filmFormModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filmFormModalLabel">Add/Edit Film</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="film-form">
+                        <input type="hidden" id="film-id">
+                        <div class="mb-3">
+                            <label for="film-title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="film-title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="film-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="film-description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="film-rating" class="form-label">Rating (0-10)</label>
+                            <input type="number" class="form-control" id="film-rating" min="0" max="10" step="0.1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="film-director" class="form-label">Director</label>
+                            <input type="text" class="form-control" id="film-director" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="film-release-year" class="form-label">Release Year</label>
+                            <input type="number" class="form-control" id="film-release-year" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveFilm()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for viewing film details -->
+    <div class="modal fade" id="filmDetailsModal" tabindex="-1" aria-labelledby="filmDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filmDetailsModalLabel">Film Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>ID:</strong> <span id="detail-film-id"></span></p>
+                    <p><strong>Title:</strong> <span id="detail-film-title"></span></p>
+                    <p><strong>Description:</strong> <span id="detail-film-description"></span></p>
+                    <p><strong>Rating:</strong> <span id="detail-film-rating"></span></p>
+                    <p><strong>Director:</strong> <span id="detail-film-director"></span></p>
+                    <p><strong>Release Year:</strong> <span id="detail-film-release-year"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE_URL = "http://127.0.0.1:8000";
+
+        function openAddFilmModal() {
+            document.getElementById("film-id").value = "";
+            document.getElementById("film-form").reset();
+            document.getElementById("filmFormModalLabel").textContent = "Add New Film";
+        }
+
+        async function fetchFilms() {
+            const response = await fetch(`${API_BASE_URL}/film`);
+            const films = await response.json();
+            const filmList = document.getElementById("film-list");
+            filmList.innerHTML = "";
+
+            films.forEach((film, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${film.judul_film}</td>
+                    <td>${film.deskripsi}</td>
+                    <td>${film.rating}</td>
+                    <td>${film.sutradara}</td>
+                    <td>${film.tahun_rilis}</td>
+                    <td>
+                        <button class="btn btn-info btn-sm" onclick="viewFilm(${film.id})">Read More</button>
+                        <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#filmFormModal" onclick="editFilm(${film.id})">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteFilm(${film.id})">Delete</button>
+                    </td>
+                `;
+                filmList.appendChild(row);
+            });
+        }
+
+        async function saveFilm() {
+            const id = document.getElementById("film-id").value;
+            const title = document.getElementById("film-title").value;
+            const description = document.getElementById("film-description").value;
+            const rating = parseFloat(document.getElementById("film-rating").value);
+            const director = document.getElementById("film-director").value;
+            const releaseYear = parseInt(document.getElementById("film-release-year").value);
+
+            const payload = { judul_film: title, deskripsi: description, rating, sutradara: director, tahun_rilis: releaseYear };
+
+            if (id) {
+                await fetch(`${API_BASE_URL}/film/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                await fetch(`${API_BASE_URL}/film`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            }
+            fetchFilms();
+            const modal = bootstrap.Modal.getInstance(document.getElementById("filmFormModal"));
+            modal.hide();
+        }
+
+        async function editFilm(id) {
+            const response = await fetch(`${API_BASE_URL}/film/${id}`);
+            const film = await response.json();
+
+            document.getElementById("film-id").value = id;
+            document.getElementById("film-title").value = film.judul_film;
+            document.getElementById("film-description").value = film.deskripsi;
+            document.getElementById("film-rating").value = film.rating;
+            document.getElementById("film-director").value = film.sutradara;
+            document.getElementById("film-release-year").value = film.tahun_rilis;
+
+            document.getElementById("filmFormModalLabel").textContent = "Edit Film";
+        }
+
+        async function viewFilm(id) {
+            const response = await fetch(`${API_BASE_URL}/film/${id}`);
+            const film = await response.json();
+
+            document.getElementById("detail-film-id").textContent = id;
+            document.getElementById("detail-film-title").textContent = film.judul_film;
+            document.getElementById("detail-film-description").textContent = film.deskripsi;
+            document.getElementById("detail-film-rating").textContent = film.rating;
+            document.getElementById("detail-film-director").textContent = film.sutradara;
+            document.getElementById("detail-film-release-year").textContent = film.tahun_rilis;
+
+            const filmDetailsModal = new bootstrap.Modal(document.getElementById("filmDetailsModal"));
+            filmDetailsModal.show();
+        }
+
+        async function deleteFilm(id) {
+            if (confirm("Are you sure you want to delete this film?")) {
+                await fetch(`${API_BASE_URL}/film/${id}`, { method: "DELETE" });
+                fetchFilms();
+            }
+        }
+
+        fetchFilms();
+    </script>
+</body>
+</html>
