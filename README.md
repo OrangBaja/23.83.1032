@@ -1,5 +1,7 @@
 # Python-API
-
+#Tidilix
+#Aldito Rifpal Jayadana 23.83.1032
+#Tino Febrian Effendi 23.83.1048
 # Aplikasi CRUD FastAPI dengan MySQL
 
 Aplikasi sederhana menggunakan FastAPI dengan backend MySQL untuk operasi CRUD dasar. Proyek ini mencakup:
